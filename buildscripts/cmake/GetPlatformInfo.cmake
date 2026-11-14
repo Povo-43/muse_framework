@@ -22,7 +22,12 @@ if (PLATFORM_DETECTED)
     return()
 endif()
 
-if(${CMAKE_CXX_COMPILER} MATCHES "/em\\+\\+(-[a-zA-Z0-9.])?$")
+# NOTE: when cross-compiling (e.g. for Android) CMAKE_SYSTEM_NAME refers to
+# the target platform, while CMAKE_HOST_SYSTEM_NAME refers to the build host.
+# The target platform must take priority.
+if(${CMAKE_SYSTEM_NAME} MATCHES "Android")
+    set(OS_IS_ANDROID 1)
+elseif(${CMAKE_CXX_COMPILER} MATCHES "/em\\+\\+(-[a-zA-Z0-9.])?$")
     set(OS_IS_WASM 1)
 elseif(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
     set(OS_IS_WIN 1)

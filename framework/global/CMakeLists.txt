@@ -244,6 +244,13 @@ else()
             Winmm # needed for timeBeginPeriod
         )
     endif()
+
+    if (OS_IS_ANDROID)
+        target_sources(muse_global PRIVATE
+            platform/android/androidassets.cpp
+            platform/android/androidassets.h
+        )
+    endif()
 endif()
 
 include(GetCompilerInfo)

@@ -30,7 +30,9 @@
 #include "audio/driver/platform/jack/jackaudiodriver.h"
 #endif
 
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
+#ifdef Q_OS_ANDROID
+#include "audio/driver/platform/android/aaudioaudiodriver.h"
+#elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
 #include <QtEnvironmentVariables>
 #include "audio/driver/platform/lin/alsaaudiodriver.h"
 #ifdef MUSE_MODULE_AUDIO_PIPEWIRE
@@ -75,6 +77,11 @@ std::vector<std::string> AudioDriverFactory::availableAudioDrivers() const
 
     return names;
 #endif // Q_OS_WIN
+
+#ifdef Q_OS_ANDROID
+    names.push_back("AAudio");
+    return names;
+#endif // Q_OS_ANDROID
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
     names.push_back("ALSA");
@@ -123,6 +130,11 @@ IAudioDriverPtr AudioDriverFactory::createDriver(const std::string& name) const
 
     // required WASAPI or fallback
     return std::shared_ptr<IAudioDriver>(new WasapiAudioDriver());
+#endif
+
+#ifdef Q_OS_ANDROID
+    // required AAudio or fallback
+    return std::shared_ptr<IAudioDriver>(new AAudioAudioDriver());
 #endif
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)

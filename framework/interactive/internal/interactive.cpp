@@ -306,7 +306,7 @@ void Interactive::showProgress(const std::string& title, Progress progress)
     openAsync(uri, params);
 }
 
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
 // see QQuickPlatformFileDialog::FileMode
 enum class FileDialogMode {
     OpenFile = 0,
@@ -344,7 +344,7 @@ static UriQuery makeSelectFileQuery(FileDialogMode mode, const std::string& titl
 
 #endif
 
-#ifndef Q_OS_LINUX
+#if !defined(Q_OS_LINUX) || defined(Q_OS_ANDROID)
 static QString filterToString(const std::vector<std::string>& filter)
 {
     QStringList result;
@@ -360,7 +360,7 @@ static QString filterToString(const std::vector<std::string>& filter)
 async::Promise<io::path_t> Interactive::selectOpeningFile(const std::string& title, const io::path_t& dir,
                                                           const std::vector<std::string>& filter)
 {
-#ifndef Q_OS_LINUX
+#if !defined(Q_OS_LINUX) || defined(Q_OS_ANDROID)
     return async::make_promise<io::path_t>([title, dir, filter](auto resolve, auto reject) {
         QFileDialog* dlg = new QFileDialog(nullptr, QString::fromStdString(title), dir.toQString(), filterToString(filter));
 
@@ -410,7 +410,7 @@ async::Promise<io::path_t> Interactive::selectOpeningFile(const std::string& tit
 io::path_t Interactive::selectOpeningFileSync(const std::string& title, const io::path_t& dir, const std::vector<std::string>& filter,
                                               const int options)
 {
-#ifndef Q_OS_LINUX
+#if !defined(Q_OS_LINUX) || defined(Q_OS_ANDROID)
     const QFileDialog::Options qoptions = QFileDialog::Options::fromInt(options);
     QString result = QFileDialog::getOpenFileName(nullptr, QString::fromStdString(title), dir.toQString(), filterToString(
                                                       filter), nullptr, qoptions);
@@ -430,7 +430,7 @@ io::path_t Interactive::selectOpeningFileSync(const std::string& title, const io
 io::paths_t Interactive::selectOpeningFilesSync(const std::string& title, const io::path_t& dir, const std::vector<std::string>& filter,
                                                 const int options)
 {
-#ifndef Q_OS_LINUX
+#if !defined(Q_OS_LINUX) || defined(Q_OS_ANDROID)
     const QFileDialog::Options qoptions = QFileDialog::Options::fromInt(options);
     const QStringList result = QFileDialog::getOpenFileNames(nullptr, QString::fromStdString(title), dir.toQString(), filterToString(
                                                                  filter), nullptr, qoptions);
@@ -465,7 +465,7 @@ io::paths_t Interactive::selectOpeningFilesSync(const std::string& title, const 
 async::Promise<io::path_t> Interactive::selectSavingFile(const std::string& title, const io::path_t& dir,
                                                          const std::vector<std::string>& filter, bool confirmOverwrite)
 {
-#ifndef Q_OS_LINUX
+#if !defined(Q_OS_LINUX) || defined(Q_OS_ANDROID)
     return async::make_promise<io::path_t>([title, dir, filter, confirmOverwrite](auto resolve, auto reject) {
         QFileDialog* dlg = new QFileDialog(nullptr, QString::fromStdString(title), dir.toQString(), filterToString(filter));
 
@@ -518,7 +518,7 @@ async::Promise<io::path_t> Interactive::selectSavingFile(const std::string& titl
 io::path_t Interactive::selectSavingFileSync(const std::string& title, const io::path_t& dir, const std::vector<std::string>& filter,
                                              bool confirmOverwrite)
 {
-#ifndef Q_OS_LINUX
+#if !defined(Q_OS_LINUX) || defined(Q_OS_ANDROID)
     QFileDialog::Options options;
     options.setFlag(QFileDialog::DontConfirmOverwrite, !confirmOverwrite);
     QString result = QFileDialog::getSaveFileName(nullptr, QString::fromStdString(title), dir.toQString(), filterToString(
@@ -540,7 +540,7 @@ io::path_t Interactive::selectSavingFileSync(const std::string& title, const io:
 
 io::path_t Interactive::selectDirectory(const std::string& title, const io::path_t& dir)
 {
-#ifndef Q_OS_LINUX
+#if !defined(Q_OS_LINUX) || defined(Q_OS_ANDROID)
     QString result = QFileDialog::getExistingDirectory(nullptr, QString::fromStdString(title), dir.toQString());
     return result;
 #else

@@ -30,6 +30,10 @@
 
 #include "muse_framework_config.h"
 
+#ifdef Q_OS_ANDROID
+#include "platform/android/androidassets.h"
+#endif
+
 #include "log.h"
 
 using namespace muse;
@@ -82,6 +86,11 @@ QString GlobalConfiguration::resolveAppDataPath() const
     return dir.absolutePath() + "/";
 #elif defined(Q_OS_WASM)
     return "/files/share";
+#elif defined(Q_OS_ANDROID)
+    // The bundled resources live inside the APK (assets), but some consumers
+    // (FluidSynth, liblouis) read them with plain stdio, which cannot access
+    // APK assets. Copy them once into a writable directory and use that.
+    return android::setupAppDataFromAssets();
 #else
     // Try relative path (needed for portable AppImage and non-standard installations)
     QDir dir(QCoreApplication::applicationDirPath() + QString("/../" MUSE_APP_INSTALL_RESOURCES_LOCATION));

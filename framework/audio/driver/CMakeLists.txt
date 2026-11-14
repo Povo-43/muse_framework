@@ -98,6 +98,13 @@ elseif(OS_IS_MAC)
     find_library(AudioToolbox NAMES AudioToolbox)
     find_library(CoreAudio NAMES CoreAudio)
     target_link_libraries(muse_audio_driver PRIVATE ${AudioToolbox} ${CoreAudio})
+elseif(OS_IS_ANDROID)
+    target_sources(muse_audio_driver PRIVATE
+        platform/android/aaudioaudiodriver.cpp
+        platform/android/aaudioaudiodriver.h
+    )
+
+    target_link_libraries(muse_audio_driver PRIVATE aaudio)
 elseif(OS_IS_WASM)
     target_sources(muse_audio_driver PRIVATE
         platform/web/webaudiodriver.cpp
