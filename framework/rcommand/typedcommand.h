@@ -521,5 +521,5 @@ struct std::tuple_size<muse::rcommand::FieldsScheme<S, T...>>
 
 template<std::size_t I, typename S, typename ... T>
 struct std::tuple_element<I, muse::rcommand::FieldsScheme<S, T...>> {
-    using type = std::tuple_element_t<I, std::tuple<Field<S, T>...>>;
+    using type = std::tuple_element_t<I, std::tuple<muse::rcommand::Field<S, T>...>>;
 };

@@ -88,7 +88,7 @@ void UiModule::registerExports()
     m_platformTheme = std::make_shared<MacOSPlatformTheme>();
     #elif defined(Q_OS_WIN)
     m_platformTheme = std::make_shared<WindowsPlatformTheme>();
-    #elif defined(Q_OS_LINUX)
+    #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     m_platformTheme = std::make_shared<LinuxPlatformTheme>();
     #else
     m_platformTheme = std::make_shared<StubPlatformTheme>();

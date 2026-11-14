@@ -38,7 +38,7 @@ class WidgetStyle;
 class MacOSPlatformTheme;
 #elif defined(Q_OS_WIN)
 class WindowsPlatformTheme;
-#elif defined(Q_OS_LINUX)
+#elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
 class LinuxPlatformTheme;
 #else
 class StubPlatformTheme;
@@ -68,7 +68,7 @@ private:
     std::shared_ptr<MacOSPlatformTheme> m_platformTheme;
     #elif defined(Q_OS_WIN)
     std::shared_ptr<WindowsPlatformTheme> m_platformTheme;
-    #elif defined(Q_OS_LINUX)
+    #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     std::shared_ptr<LinuxPlatformTheme> m_platformTheme;
     #else
     std::shared_ptr<StubPlatformTheme> m_platformTheme;
