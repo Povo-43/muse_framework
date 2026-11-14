@@ -83,7 +83,7 @@ std::vector<std::string> AudioDriverFactory::availableAudioDrivers() const
     return names;
 #endif // Q_OS_ANDROID
 
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID) || defined(Q_OS_FREEBSD)
     names.push_back("ALSA");
     if (qEnvironmentVariableIsSet("MUSESCORE_FORCE_ALSA")) {
         return names;
@@ -137,7 +137,7 @@ IAudioDriverPtr AudioDriverFactory::createDriver(const std::string& name) const
     return std::shared_ptr<IAudioDriver>(new AAudioAudioDriver());
 #endif
 
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID) || defined(Q_OS_FREEBSD)
     if (qEnvironmentVariableIsSet("MUSESCORE_FORCE_ALSA")) {
         if (name != "ALSA") {
             LOGW() << "required: " << name << ", but is set MUSESCORE_FORCE_ALSA";
