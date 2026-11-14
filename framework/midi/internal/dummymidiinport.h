@@ -30,13 +30,16 @@ class DummyMidiInPort : public IMidiInPort
 public:
 
     void init();
+    void deinit();
 
     std::vector<MidiDevice> availableDevices() const override;
+    async::Notification availableDevicesChanged() const override;
 
     Ret connect(const MidiDeviceID& deviceID) override;
     void disconnect() override;
     bool isConnected() const override;
     MidiDeviceID deviceID() const override;
+    async::Notification deviceChanged() const override;
 
     async::Channel<tick_t, Event> eventReceived() const override;
 

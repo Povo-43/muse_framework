@@ -37,10 +37,11 @@ struct AAudioContext
 
 AAudioContext* s_context = nullptr;
 
-void aaudioDataCallback(AAudioStream* /*stream*/, void* /*userData*/, void* audioData, int32_t numFrames)
+aaudio_data_callback_result_t aaudioDataCallback(AAudioStream* /*stream*/, void* /*userData*/, void* audioData,
+                                                 int32_t numFrames)
 {
     if (!s_context || !s_context->callback) {
-        return;
+        return AAUDIO_CALLBACK_RESULT_STOP;
     }
 
     muse::runtime::setThreadName("audio_driver");
@@ -50,6 +51,8 @@ void aaudioDataCallback(AAudioStream* /*stream*/, void* /*userData*/, void* audi
     // they are stored in the driver's active spec (see open()).
     int len = numFrames * s_context->channels * static_cast<int>(sizeof(float));
     s_context->callback(static_cast<uint8_t*>(audioData), len);
+
+    return AAUDIO_CALLBACK_RESULT_CONTINUE;
 }
 
 void aaudioErrorCallback(AAudioStream* /*stream*/, void* /*userData*/, aaudio_result_t error)

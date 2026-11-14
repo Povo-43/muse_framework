@@ -31,6 +31,10 @@ void DummyMidiOutPort::init()
 {
 }
 
+void DummyMidiOutPort::deinit()
+{
+}
+
 MidiDeviceList DummyMidiOutPort::availableDevices() const
 {
     MidiDevice d;
@@ -65,6 +69,11 @@ bool DummyMidiOutPort::isConnected() const
 MidiDeviceID DummyMidiOutPort::deviceID() const
 {
     return m_connectedDeviceID;
+}
+
+async::Notification DummyMidiOutPort::deviceChanged() const
+{
+    return {};
 }
 
 bool DummyMidiOutPort::supportsMIDI20Output() const

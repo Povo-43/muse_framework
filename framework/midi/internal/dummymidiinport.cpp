@@ -28,12 +28,21 @@ void DummyMidiInPort::init()
 {
 }
 
+void DummyMidiInPort::deinit()
+{
+}
+
 std::vector<MidiDevice> DummyMidiInPort::availableDevices() const
 {
     MidiDevice d;
     d.id = "dummy";
     d.name = "Dummy";
     return { d };
+}
+
+async::Notification DummyMidiInPort::availableDevicesChanged() const
+{
+    return {};
 }
 
 Ret DummyMidiInPort::connect(const MidiDeviceID& deviceID)
@@ -55,6 +64,11 @@ bool DummyMidiInPort::isConnected() const
 MidiDeviceID DummyMidiInPort::deviceID() const
 {
     return m_deviceID;
+}
+
+async::Notification DummyMidiInPort::deviceChanged() const
+{
+    return {};
 }
 
 async::Channel<tick_t, Event> DummyMidiInPort::eventReceived() const

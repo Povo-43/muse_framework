@@ -30,6 +30,7 @@ class DummyMidiOutPort : public IMidiOutPort
 public:
 
     void init();
+    void deinit();
 
     MidiDeviceList availableDevices() const override;
     async::Notification availableDevicesChanged() const override;
@@ -38,6 +39,7 @@ public:
     void disconnect() override;
     bool isConnected() const override;
     MidiDeviceID deviceID() const override;
+    async::Notification deviceChanged() const override;
 
     bool supportsMIDI20Output() const override;
 
