@@ -195,8 +195,16 @@ struct Field {
         : key(key), member(member), label(label), description(description), min(min), max(max), presence(presence) {}
 };
 
+// NOTE: this is a class template with an explicit deduction guide instead of
+// an alias template, because class template argument deduction for alias
+// templates (P1814) is not supported/crashes with the Android NDK toolchains.
 template<typename S, typename ... T>
-using FieldsScheme = std::tuple<Field<S, T>...>;
+struct FieldsScheme : std::tuple<Field<S, T>...> {
+    using std::tuple<Field<S, T>...>::tuple;
+};
+
+template<typename S, typename ... T>
+FieldsScheme(Field<S, T>...) -> FieldsScheme<S, T...>;
 
 template<typename E>
 struct EnumContract;
@@ -505,3 +513,13 @@ CommandInfo makeCommandInfo()
     return info;
 }
 }
+
+// tuple interface for FieldsScheme (needed because it derives from std::tuple)
+template<typename S, typename ... T>
+struct std::tuple_size<muse::rcommand::FieldsScheme<S, T...>>
+    : std::integral_constant<std::size_t, sizeof...(T)> {};
+
+template<std::size_t I, typename S, typename ... T>
+struct std::tuple_element<I, muse::rcommand::FieldsScheme<S, T...>> {
+    using type = std::tuple_element_t<I, std::tuple<Field<S, T>...>>;
+};

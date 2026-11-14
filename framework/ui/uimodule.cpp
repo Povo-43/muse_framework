@@ -47,7 +47,7 @@
 #elif defined(Q_OS_WIN)
 #include "internal/platform/windows/windowsplatformtheme.h"
 #include "internal/platform/windows/winwindowscontroller.h"
-#elif defined(Q_OS_LINUX)
+#elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
 #include "internal/platform/linux/linuxplatformtheme.h"
 #include "internal/windowscontroller.h"
 #else
