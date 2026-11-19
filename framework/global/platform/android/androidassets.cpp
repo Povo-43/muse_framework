@@ -26,7 +26,6 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QStandardPaths>
-#include <QtConcurrent/QtConcurrent>
 
 #include "muse_framework_config.h"
 
@@ -76,62 +75,55 @@ static bool copyAssetFile(const QString& from, const QString& to)
 }
 
 // NOTE: Asset copying (soundfonts, templates, styles, ...) can take tens of
-// seconds on first launch (70+ MB). Run it on a background thread so the UI
-// stays responsive. The destination path is returned immediately; consumers
-// that need a file before the copy finished will fall back to the asset URL.
-static QFuture<void> s_copyFuture;
-
-void copyAppDataFromAssetsAsync()
+// seconds on first launch (70+ MB). We copy synchronously here so that by the
+// time the app continues past the splash screen, all bundled resources are
+// available for libraries that read them with plain stdio (FluidSynth,
+// liblouis, etc.).
+QString setupAppDataFromAssets()
 {
     const QString srcRoot = assetsRoot();
     const QString dstRoot = dataRoot();
 
-    // Collect the list of files to copy first (QDirIterator is not re-entrant
-    // safe across threads well, but here it runs entirely in the worker thread).
-    auto worker = [srcRoot, dstRoot]() {
-        QDirIterator it(srcRoot, QDirIterator::Subdirectories);
-        int copied = 0;
-        int skipped = 0;
-        while (it.hasNext()) {
-            const QString assetPath = it.next();
-            const QFileInfo assetInfo(assetPath);
-            if (assetInfo.isDir()) {
-                continue;
-            }
+    LOGI() << "App assets copy STARTED from:" << srcRoot << "to:" << dstRoot;
 
-            const QString relative = assetPath.mid(srcRoot.length());
-            const QString dstPath = dstRoot + relative;
-
-            const QFileInfo dstInfo(dstPath);
-            const qint64 assetSize = assetInfo.size();
-
-            if (dstInfo.exists() && assetSize > 0 && dstInfo.size() == assetSize) {
-                ++skipped;
-                continue;
-            }
-
-            QDir().mkpath(QFileInfo(dstPath).absolutePath());
-            if (copyAssetFile(assetPath, dstPath)) {
-                ++copied;
-            } else {
-                LOGE() << "Failed to copy asset: " << assetPath << " -> " << dstPath;
-            }
+    QDirIterator it(srcRoot, QDirIterator::Subdirectories);
+    int copied = 0;
+    int skipped = 0;
+    qint64 totalBytes = 0;
+    while (it.hasNext()) {
+        const QString assetPath = it.next();
+        const QFileInfo assetInfo(assetPath);
+        if (assetInfo.isDir()) {
+            continue;
         }
-        LOGI() << "App assets copied:" << copied << "files, skipped:" << skipped;
-        LOGI() << "App resources are available at: " << dstRoot;
-    };
 
-    s_copyFuture = QtConcurrent::run(worker);
-}
+        const QString relative = assetPath.mid(srcRoot.length());
+        const QString dstPath = dstRoot + relative;
 
-QString setupAppDataFromAssets()
-{
-    // Kick off the background copy (idempotent: QFuture::started() prevents
-    // re-launching if a previous copy is still in flight).
-    if (!s_copyFuture.isStarted() && !s_copyFuture.isRunning()) {
-        copyAppDataFromAssetsAsync();
+        const QFileInfo dstInfo(dstPath);
+        const qint64 assetSize = assetInfo.size();
+
+        if (dstInfo.exists() && assetSize > 0 && dstInfo.size() == assetSize) {
+            ++skipped;
+            continue;
+        }
+
+        QDir().mkpath(QFileInfo(dstPath).absolutePath());
+        if (copyAssetFile(assetPath, dstPath)) {
+            ++copied;
+            totalBytes += assetSize;
+            if (copied % 10 == 0) {
+                LOGI() << "App assets copying..." << copied << "files done,"
+                       << totalBytes << "bytes so far, current:" << relative;
+            }
+        } else {
+            LOGE() << "Failed to copy asset: " << assetPath << " -> " << dstPath;
+        }
     }
+    LOGI() << "App assets copy DONE:" << copied << "files, skipped:" << skipped
+           << ", totalBytes:" << totalBytes;
+    LOGI() << "App resources are available at: " << dstRoot;
 
-    return dataRoot() + "/";
+    return dstRoot + "/";
 }
 }
